@@ -1,0 +1,13 @@
+# ~/.zshenv — sourced by EVERY zsh (login, interactive, scripts). Keep it tiny:
+# just XDG paths and where zsh keeps its own files. Ported from bootstrap.sh:564-575.
+# (chezmoi maps the source name 'dot_zshenv' to the target '~/.zshenv'.)
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+export ZSH="$XDG_DATA_HOME/omz"
+export ZSH_CACHE_DIR="$XDG_CACHE_HOME/zsh"
+export HISTFILE="$ZDOTDIR/.zhistory"
+export HISTSIZE=10000
+export SAVEHIST=10000
+export PATH="/usr/sbin:$PATH"

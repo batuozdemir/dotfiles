@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Install the modern-CLI tools that live in ~/.local/bin and aren't apt packages:
+# zoxide, uv, fzf — plus the Debian batcat/fdfind -> bat/fd shims. Runs for EVERY
+# scope (these are part of bootstrap.sh Phase 6 before the scope check).
+# Ported from bootstrap.sh:577-598.
+#
+# 'run_onchange_' = chezmoi re-runs this only when the rendered script changes.
+# 'before_' = runs before chezmoi writes the dotfiles. Every step below is guarded
+# so re-running is a no-op (idempotent), matching the script's command -v checks.
+set -eu
+
+mkdir -p "$HOME/.local/bin" "$HOME/.cache/zsh"
+
+# bat / fd are named batcat / fdfind on Debian — symlink to the expected names.
+ln -sf /usr/bin/batcat "$HOME/.local/bin/bat" 2>/dev/null || true
+ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"  2>/dev/null || true
+
+# zoxide (smarter cd)
+if ! command -v zoxide >/dev/null && [ ! -x "$HOME/.local/bin/zoxide" ]; then
+  curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+fi
+
+# uv (Python package & project manager) — official installer, into ~/.local/bin.
+if ! command -v uv >/dev/null && [ ! -x "$HOME/.local/bin/uv" ]; then
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+# fzf (fuzzy finder) — clone + build just the binary, then symlink it.
+if [ ! -d "$HOME/.local/share/fzf" ]; then
+  git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.local/share/fzf"
+  "$HOME/.local/share/fzf/install" --bin >/dev/null 2>&1 || true
+fi
+ln -sf "$HOME/.local/share/fzf/bin/fzf" "$HOME/.local/bin/fzf" 2>/dev/null || true

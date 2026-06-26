@@ -1,0 +1,22 @@
+# Static, non-secret data shared by the templates and run-scripts in this tree.
+# chezmoi merges this into the template data, so a script can loop over the list
+# below with {{ range .omz_plugins }}. Because the rendered script then contains
+# the full list, ADDING OR REMOVING a plugin here changes the script's hash, which
+# makes the `run_onchange_` installer re-run automatically. (Port of the
+# clone_plugin calls in bootstrap.sh lines 724-731.)
+omz_plugins:
+  # Theme — powerlevel10k. dest is relative to $ZSH/custom/ (themes/ vs plugins/).
+  - repo: https://github.com/romkatv/powerlevel10k.git
+    dest: themes/powerlevel10k
+  - repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: plugins/zsh-autosuggestions
+  - repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+    dest: plugins/zsh-syntax-highlighting
+  - repo: https://github.com/MichaelAquilina/zsh-you-should-use
+    dest: plugins/you-should-use
+  - repo: https://github.com/changyuheng/zsh-interactive-cd
+    dest: plugins/zsh-interactive-cd
+  # zsh-ai: type '# describe a command' and it fills it in. Needs an API key
+  # (see the plugin README) — installed but inert until configured.
+  - repo: https://github.com/batuozdemir/zsh-ai.git
+    dest: plugins/zsh-ai

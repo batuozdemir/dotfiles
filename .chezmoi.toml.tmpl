@@ -1,0 +1,23 @@
+# chezmoi configuration — this file is a TEMPLATE that chezmoi renders into the
+# real config (~/.config/chezmoi/chezmoi.toml) when you run `chezmoi init`.
+#
+# It decides ONE thing: the install scope. Resolution order:
+#   1. the DOTFILES_SCOPE env var, if set  (this is how the Ansible role passes it)
+#   2. otherwise, an interactive prompt     (when you run `chezmoi init` by hand)
+#   3. otherwise, the default "standard"     (non-interactive with no env var)
+#
+# scope mirrors bootstrap.sh's --minimal/--standard/--full:
+#   minimal  = bare zsh + modern-CLI tools, no Oh My Zsh / p10k / tmux
+#   standard = + Oh My Zsh, powerlevel10k, plugins, tmux + TPM + catppuccin
+#   full     = same shell as standard (server extras live in Ansible, not here)
+{{- $scope := env "DOTFILES_SCOPE" -}}
+{{- if eq $scope "" -}}
+{{-   if stdinIsATTY -}}
+{{-     $scope = promptString "Install scope (minimal | standard | full)" "standard" -}}
+{{-   else -}}
+{{-     $scope = "standard" -}}
+{{-   end -}}
+{{- end }}
+
+[data]
+    scope = {{ $scope | quote }}

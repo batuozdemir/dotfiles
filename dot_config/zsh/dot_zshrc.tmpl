@@ -1,0 +1,57 @@
+{{- /*
+  ~/.config/zsh/.zshrc — a chezmoi TEMPLATE.
+
+  ★ ORDERING IS LOAD-BEARING. This file preserves the exact order bootstrap.sh
+    fought for (see bootstrap.sh:735-786 / MIGRATION-PLAN.md §7). Do not reorder:
+      1. tmux auto-launch   — MUST be above the p10k instant-prompt block
+      2. p10k instant prompt, then Oh My Zsh + plugins + theme
+      3. modular configs loaded with exports FIRST (puts ~/.local/bin on PATH)
+      4. zoxide init AFTER exports.zsh (so 'z' actually finds the binary)
+      5. zsh-syntax-highlighting sourced DEAD LAST (it only colours widgets
+         defined before it)
+
+  The {{ if ne .scope "minimal" }} block below replaces bootstrap.sh's two code
+  paths (the build_zshrc() minimal/standard split) with one templated file.
+  On minimal: no tmux launch, no Oh My Zsh/p10k — just the modular configs,
+  zoxide, and the syntax-highlighting guard (its file simply won't exist).
+*/ -}}
+{{ if ne .scope "minimal" -}}
+# --- Auto-launch tmux on SSH (MUST stay above the p10k instant-prompt block) ---
+# Bypass once with:  ssh -t user@host "SKIP_TMUX=1 zsh -l"
+if [[ -z "$TMUX" ]] && [[ -n "$SSH_CONNECTION" ]] && [[ -t 0 ]] && [[ -z "$SKIP_TMUX" ]]; then
+  if command -v tmux &>/dev/null; then
+    exec tmux new-session -A -s main      # detaching (C-b d) closes the SSH session
+  else
+    echo "WARNING: tmux not found; falling back to zsh."
+  fi
+fi
+
+# p10k instant prompt (keep near the top, but below the tmux block above)
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+export ZSH="$HOME/.local/share/omz"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# NOTE: zsh-syntax-highlighting is intentionally NOT in this array — it must be
+# sourced LAST (see end of file), after every other widget is defined.
+plugins=(git zsh-autosuggestions you-should-use zsh-interactive-cd zsh-ai)
+
+source "$ZSH/oh-my-zsh.sh"
+[[ ! -f "$ZDOTDIR/.p10k.zsh" ]] || source "$ZDOTDIR/.p10k.zsh"
+
+{{ end -}}
+# Load modular configs (exports first so PATH is ready for the rest)
+for f in exports aliases functions fzf; do
+  [ -f "$ZDOTDIR/$f.zsh" ] && source "$ZDOTDIR/$f.zsh"
+done
+
+# zoxide AFTER exports.zsh — that's what puts ~/.local/bin (where zoxide and uv
+# install) on PATH. Running it earlier meant 'command -v zoxide' failed and the
+# 'z' function was never defined.
+command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
+
+# MUST be last: syntax highlighting only colours widgets defined before it.
+_zsh_sh="$ZSH/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+[ -f "$_zsh_sh" ] && source "$_zsh_sh"

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Install Oh My Zsh + powerlevel10k + the plugins (standard/full only).
+# Ported from bootstrap.sh:708-733. The plugin list is templated from
+# .chezmoidata.yaml, so editing that list re-runs this script (hash changes).
+{{ if ne .scope "minimal" -}}
+set -eu
+OMZ_DIR="$HOME/.local/share/omz"
+ZSH_CUSTOM_DIR="$OMZ_DIR/custom"
+
+# Oh My Zsh. CHSH=no / RUNZSH=no / KEEP_ZSHRC=yes make the installer fully
+# non-interactive and stop it clobbering the .zshrc chezmoi just wrote.
+if [ ! -d "$OMZ_DIR" ]; then
+  ZSH="$OMZ_DIR" RUNZSH=no KEEP_ZSHRC=yes CHSH=no \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+# Clone each theme/plugin once (the [ -d ] guard makes re-runs a no-op).
+clone_plugin() {  # $1=repo  $2=dest
+  [ -d "$2" ] && return 0
+  git clone --depth=1 "$1" "$2"
+}
+{{ range .omz_plugins -}}
+clone_plugin {{ .repo | quote }} "$ZSH_CUSTOM_DIR/{{ .dest }}"
+{{ end -}}
+{{ else -}}
+# scope=minimal: Oh My Zsh and plugins are intentionally not installed.
+:
+{{ end -}}
