@@ -2,7 +2,7 @@
 # Install TPM (tmux plugin manager) and the plugins listed in tmux.conf
 # (standard/full only). Ported from bootstrap.sh:798-862. Runs 'after' so the
 # tmux.conf chezmoi manages is already in place.
-{{ if ne .scope "minimal" -}}
+{{ if and (ne .scope "minimal") (ne .scope "lean") -}}
 set -eu
 TPM_DIR="$HOME/.config/tmux/plugins/tpm"
 
@@ -16,6 +16,6 @@ fi
 "$TPM_DIR/bin/install_plugins" >/dev/null 2>&1 || \
   echo "tmux plugins will finish installing on first launch (prefix + I)"
 {{ else -}}
-# scope=minimal: tmux (and therefore TPM) is intentionally not configured.
+# scope=minimal/lean: tmux (and therefore TPM) is intentionally not configured.
 :
 {{ end -}}

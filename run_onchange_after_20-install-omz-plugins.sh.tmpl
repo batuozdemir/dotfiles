@@ -2,7 +2,7 @@
 # Install Oh My Zsh + powerlevel10k + the plugins (standard/full only).
 # Ported from bootstrap.sh:708-733. The plugin list is templated from
 # .chezmoidata.yaml, so editing that list re-runs this script (hash changes).
-{{ if ne .scope "minimal" -}}
+{{ if and (ne .scope "minimal") (ne .scope "lean") -}}
 set -eu
 OMZ_DIR="$HOME/.local/share/omz"
 ZSH_CUSTOM_DIR="$OMZ_DIR/custom"
@@ -23,6 +23,7 @@ clone_plugin() {  # $1=repo  $2=dest
 clone_plugin {{ .repo | quote }} "$ZSH_CUSTOM_DIR/{{ .dest }}"
 {{ end -}}
 {{ else -}}
-# scope=minimal: Oh My Zsh and plugins are intentionally not installed.
+# scope=minimal/lean: Oh My Zsh and plugins are intentionally not installed
+# (lean sources its few plugins directly — see run_onchange_after_25-...).
 :
 {{ end -}}
