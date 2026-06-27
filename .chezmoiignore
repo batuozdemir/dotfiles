@@ -1,9 +1,10 @@
 # Files chezmoi should NOT manage on a given machine. This file is itself a
 # template, so we can ignore conditionally on the scope chosen in `chezmoi init`.
 #
-# minimal scope = no tmux config at all (mirrors bootstrap.sh, where Phase 7 only
-# runs for standard/full). The Oh My Zsh and TPM run-scripts self-disable on
-# minimal internally, so they don't need to be ignored here.
-{{ if eq .scope "minimal" }}
+# minimal AND lean scopes = no tmux config at all (mirrors bootstrap.sh, where
+# Phase 7 only runs for standard/full). The Oh My Zsh, TPM and lean-plugin
+# run-scripts self-disable on the scopes they don't apply to, so they don't need
+# to be ignored here.
+{{ if or (eq .scope "minimal") (eq .scope "lean") }}
 .config/tmux
 {{ end }}

@@ -20,3 +20,21 @@ omz_plugins:
   # (see the plugin README) — installed but inert until configured.
   - repo: https://github.com/batuozdemir/zsh-ai.git
     dest: plugins/zsh-ai
+
+# The 'lean' scope (lightweight Alpine boxes) does NOT use Oh My Zsh — these few
+# KB-sized plugins are git-cloned into $XDG_DATA_HOME/zsh/plugins/<dest> and
+# sourced DIRECTLY in .zshrc (see run_onchange_after_25-install-lean-plugins.sh.tmpl
+# and the lean-scope block in dot_zshrc.tmpl). Editing this list re-runs the
+# installer (the rendered script's hash changes). Load order is enforced in
+# .zshrc, not here: fzf-tab after compinit, syntax-highlighting sourced last.
+lean_plugins:
+  - repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: zsh-autosuggestions
+  - repo: https://github.com/Aloxaf/fzf-tab
+    dest: fzf-tab
+  - repo: https://github.com/changyuheng/zsh-interactive-cd
+    dest: zsh-interactive-cd
+  # syntax-highlighting MUST be sourced last in .zshrc (it only colours widgets
+  # defined before it) — kept last here too, purely for readability.
+  - repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+    dest: zsh-syntax-highlighting

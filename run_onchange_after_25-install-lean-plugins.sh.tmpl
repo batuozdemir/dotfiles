@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Install the 'lean' scope zsh plugins (lightweight Alpine boxes only).
+#
+# Unlike standard/full — which load plugins THROUGH Oh My Zsh's custom dir — the
+# lean scope has no omz framework. These plugins are tiny shell scripts, so we just
+# git-clone each into $XDG_DATA_HOME/zsh/plugins/<dest> and source them directly in
+# .zshrc. The repo list is templated from .chezmoidata.yaml (lean_plugins), so
+# adding/removing one there changes this script's hash and re-runs it (chezmoi
+# 'run_onchange_'). 'after_25' = runs after the dotfiles are written (.zshrc must
+# exist) but before the TPM installer (30), which is a no-op on lean anyway.
+{{ if eq .scope "lean" -}}
+set -eu
+PLUGIN_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins"
+mkdir -p "$PLUGIN_DIR"
+
+# Clone once; the [ -d ] guard makes re-runs a no-op (same pattern as the omz
+# installer's clone_plugin). --depth=1 keeps the checkout tiny.
+clone_plugin() {  # $1=repo  $2=dest-name
+  [ -d "$PLUGIN_DIR/$2" ] && return 0
+  git clone --depth=1 "$1" "$PLUGIN_DIR/$2"
+}
+{{ range .lean_plugins -}}
+clone_plugin {{ .repo | quote }} {{ .dest | quote }}
+{{ end -}}
+{{ else -}}
+# Not the lean scope: nothing to do (standard/full use Oh My Zsh, minimal has no
+# plugins at all).
+:
+{{ end -}}

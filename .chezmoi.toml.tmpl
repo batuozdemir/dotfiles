@@ -6,14 +6,16 @@
 #   2. otherwise, an interactive prompt     (when you run `chezmoi init` by hand)
 #   3. otherwise, the default "standard"     (non-interactive with no env var)
 #
-# scope mirrors bootstrap.sh's --minimal/--standard/--full:
+# scope mirrors bootstrap.sh's --minimal/--standard/--full (+ 'lean' for Alpine):
 #   minimal  = bare zsh + modern-CLI tools, no Oh My Zsh / p10k / tmux
+#   lean     = minimal + 4 small zsh plugins sourced directly (no omz); the
+#              lightweight Alpine default — see roles/alpine_base
 #   standard = + Oh My Zsh, powerlevel10k, plugins, tmux + TPM + catppuccin
 #   full     = same shell as standard (server extras live in Ansible, not here)
 {{- $scope := env "DOTFILES_SCOPE" -}}
 {{- if eq $scope "" -}}
 {{-   if stdinIsATTY -}}
-{{-     $scope = promptString "Install scope (minimal | standard | full)" "standard" -}}
+{{-     $scope = promptString "Install scope (minimal | lean | standard | full)" "standard" -}}
 {{-   else -}}
 {{-     $scope = "standard" -}}
 {{-   end -}}

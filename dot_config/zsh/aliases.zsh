@@ -11,6 +11,12 @@ if [[ -n "${_BAT_BIN:-}" ]]; then
 fi
 unset _BAT_BIN
 
+# Alpine uses doas, not sudo. If sudo is absent but doas is present, alias it so
+# the sudo-based aliases below (ports, please) and muscle-memory keep working.
+if ! command -v sudo &>/dev/null && command -v doas &>/dev/null; then
+  alias sudo='doas'
+fi
+
 # Core
 alias ls='eza --icons --group-directories-first'
 alias ll='eza -l --icons --group-directories-first --git'

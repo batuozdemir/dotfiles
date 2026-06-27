@@ -24,12 +24,17 @@ chezmoi maps funny source names to real dotfile paths in `$HOME`:
 
 ## The one variable: `scope`
 
-`scope` = `minimal | standard | full`, the same knob as bootstrap's
-`--minimal/--standard/--full`. It's chosen at `chezmoi init` time (see
-`.chezmoi.toml.tmpl`) and gates:
+`scope` = `minimal | lean | standard | full`. It's chosen at `chezmoi init` time
+(see `.chezmoi.toml.tmpl`) and gates:
 
 - **minimal** — zsh + modern CLI tools (zoxide/fzf/uv/bat/fd) only. No Oh My Zsh,
   no powerlevel10k, no tmux. The `.zshrc` is rendered lean (no OMZ block).
+- **lean** — minimal **plus** four small plugins sourced *directly* (no Oh My Zsh):
+  `zsh-autosuggestions`, `fzf-tab`, `zsh-interactive-cd`, `zsh-syntax-highlighting`
+  (cloned by `run_onchange_after_25-install-lean-plugins.sh.tmpl` into
+  `$XDG_DATA_HOME/zsh/plugins`). Still no p10k/tmux. This is the default for the
+  lightweight Alpine LXC path (`create-lxc.sh distro=alpine` → `ansible/alpine.yml`).
+  Skips `uv` (no Python toolchain by default) and reuses a distro-provided `fzf`.
 - **standard / full** — adds Oh My Zsh + p10k + plugins + tmux/TPM/catppuccin.
 
 (`full` shell == `standard` shell; the server extras that `--full` adds — Docker,

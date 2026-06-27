@@ -14,8 +14,15 @@
   paths (the build_zshrc() minimal/standard split) with one templated file.
   On minimal: no tmux launch, no Oh My Zsh/p10k — just the modular configs,
   zoxide, and the syntax-highlighting guard (its file simply won't exist).
+
+  The 'lean' scope (lightweight Alpine boxes) sits between minimal and standard:
+  NO Oh My Zsh / p10k / tmux, but it DOES source four small plugins directly
+  (autosuggestions, fzf-tab, interactive-cd, syntax-highlighting) — installed by
+  run_onchange_after_25-install-lean-plugins.sh.tmpl into $XDG_DATA_HOME/zsh/plugins.
+  Per fzf-tab's docs the order is load-bearing: compinit, then fzf-tab, then the
+  widget-wrapping plugins, with syntax-highlighting DEAD LAST (end of file).
 */ -}}
-{{ if ne .scope "minimal" -}}
+{{ if and (ne .scope "minimal") (ne .scope "lean") -}}
 # --- Auto-launch tmux on SSH (MUST stay above the p10k instant-prompt block) ---
 # Bypass once with:  ssh -t user@host "SKIP_TMUX=1 zsh -l"
 if [[ -z "$TMUX" ]] && [[ -n "$SSH_CONNECTION" ]] && [[ -t 0 ]] && [[ -z "$SKIP_TMUX" ]]; then
@@ -42,6 +49,30 @@ source "$ZSH/oh-my-zsh.sh"
 [[ ! -f "$ZDOTDIR/.p10k.zsh" ]] || source "$ZDOTDIR/.p10k.zsh"
 
 {{ end -}}
+{{ if eq .scope "lean" -}}
+# --- lean scope: comfy zsh WITHOUT Oh My Zsh -------------------------------
+# Four KB-sized plugins sourced directly (no omz framework / p10k / tmux). The
+# completion system MUST be initialised before fzf-tab, and fzf-tab MUST load
+# before the widget-wrapping plugins (autosuggestions) — that's fzf-tab's
+# documented ordering. zsh-syntax-highlighting is sourced LAST, at end of file.
+_lean_plugins="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins"
+
+# Initialise completion (omz would normally do this for us). -d points the dump
+# at the cache dir .zshenv already created. The (#qN.mh+24) glob makes the
+# security check run at most once a day instead of on every shell.
+autoload -Uz compinit
+if [[ -n ${ZSH_CACHE_DIR}/zcompdump(#qN.mh+24) ]]; then
+  compinit -d "${ZSH_CACHE_DIR:-$HOME/.cache/zsh}/zcompdump"
+else
+  compinit -C -d "${ZSH_CACHE_DIR:-$HOME/.cache/zsh}/zcompdump"
+fi
+
+# fzf-tab BEFORE autosuggestions (it must wrap completion before they wrap widgets)
+[ -f "$_lean_plugins/fzf-tab/fzf-tab.plugin.zsh" ] && source "$_lean_plugins/fzf-tab/fzf-tab.plugin.zsh"
+[ -f "$_lean_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ] && source "$_lean_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+[ -f "$_lean_plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh" ] && source "$_lean_plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
+
+{{ end -}}
 # Load modular configs (exports first so PATH is ready for the rest)
 for f in exports aliases functions fzf; do
   [ -f "$ZDOTDIR/$f.zsh" ] && source "$ZDOTDIR/$f.zsh"
@@ -53,5 +84,10 @@ done
 command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
 
 # MUST be last: syntax highlighting only colours widgets defined before it.
+# lean keeps its plugins under $XDG_DATA_HOME/zsh/plugins; standard/full under omz.
+{{ if eq .scope "lean" -}}
+_zsh_sh="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+{{ else -}}
 _zsh_sh="$ZSH/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+{{ end -}}
 [ -f "$_zsh_sh" ] && source "$_zsh_sh"

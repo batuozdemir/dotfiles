@@ -20,14 +20,22 @@ if ! command -v zoxide >/dev/null && [ ! -x "$HOME/.local/bin/zoxide" ]; then
   curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 fi
 
+{{ if ne .scope "lean" -}}
 # uv (Python package & project manager) — official installer, into ~/.local/bin.
+# Skipped on the lean scope (lightweight Alpine boxes don't ship a Python toolchain
+# by default; install uv via apk per-host if a box actually runs Python).
 if ! command -v uv >/dev/null && [ ! -x "$HOME/.local/bin/uv" ]; then
   curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
+{{ end -}}
 
-# fzf (fuzzy finder) — clone + build just the binary, then symlink it.
-if [ ! -d "$HOME/.local/share/fzf" ]; then
-  git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.local/share/fzf"
-  "$HOME/.local/share/fzf/install" --bin >/dev/null 2>&1 || true
+# fzf (fuzzy finder). If the distro already provides it (Alpine: `apk add fzf`),
+# reuse that — only Debian, which has no fzf apt package here, clones + builds the
+# binary into ~/.local/share/fzf and symlinks it onto PATH.
+if ! command -v fzf >/dev/null; then
+  if [ ! -d "$HOME/.local/share/fzf" ]; then
+    git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.local/share/fzf"
+    "$HOME/.local/share/fzf/install" --bin >/dev/null 2>&1 || true
+  fi
+  ln -sf "$HOME/.local/share/fzf/bin/fzf" "$HOME/.local/bin/fzf" 2>/dev/null || true
 fi
-ln -sf "$HOME/.local/share/fzf/bin/fzf" "$HOME/.local/bin/fzf" 2>/dev/null || true
