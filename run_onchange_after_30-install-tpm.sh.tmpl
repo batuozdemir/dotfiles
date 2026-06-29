@@ -1,18 +1,34 @@
 #!/usr/bin/env bash
-# Install TPM (tmux plugin manager) and the plugins listed in tmux.conf
+# Install TPM (tmux plugin manager) + tmux-sensible, and Catppuccin v2.3.0
 # (standard/full only). Ported from bootstrap.sh:798-862. Runs 'after' so the
 # tmux.conf chezmoi manages is already in place.
+#
+# Catppuccin is NOT a TPM plugin: v2.x must be sourced manually before
+# status-right is defined (see tmux.conf), so we clone it ourselves and pin the
+# tag. TPM still manages the rest (tmux-sensible).
 {{ if and (ne .scope "minimal") (ne .scope "lean") -}}
 set -eu
-TPM_DIR="$HOME/.config/tmux/plugins/tpm"
+PLUGINS="$HOME/.config/tmux/plugins"
+TPM_DIR="$PLUGINS/tpm"
+CAT_DIR="$PLUGINS/catppuccin/tmux"
+CAT_TAG="v2.3.0"
 
-mkdir -p "$HOME/.config/tmux/plugins"
+mkdir -p "$PLUGINS"
 if [ ! -d "$TPM_DIR" ]; then
   git clone --depth 1 https://github.com/tmux-plugins/tpm "$TPM_DIR"
 fi
 
-# Install the plugins headlessly. Non-fatal: if it can't run now (e.g. no display
-# socket), a first interactive `tmux` + prefix+I finishes the job.
+# Catppuccin: clone pinned to the tag, or move an existing clone onto it (idempotent).
+if [ ! -d "$CAT_DIR" ]; then
+  git clone --depth 1 --branch "$CAT_TAG" https://github.com/catppuccin/tmux "$CAT_DIR"
+else
+  git -C "$CAT_DIR" fetch --depth 1 origin "tag $CAT_TAG" >/dev/null 2>&1 || \
+    git -C "$CAT_DIR" fetch --depth 1 origin "$CAT_TAG"
+  git -C "$CAT_DIR" checkout -q "$CAT_TAG"
+fi
+
+# Install the TPM-managed plugins headlessly. Non-fatal: if it can't run now (e.g.
+# no display socket), a first interactive `tmux` + prefix+I finishes the job.
 "$TPM_DIR/bin/install_plugins" >/dev/null 2>&1 || \
   echo "tmux plugins will finish installing on first launch (prefix + I)"
 {{ else -}}
