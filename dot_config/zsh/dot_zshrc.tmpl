@@ -38,6 +38,14 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# Load exports.zsh BEFORE Oh My Zsh sources the zsh-ai plugin below. zsh-ai reads
+# its provider / URL / model / trigger / reasoning-effort AND the API key at plugin
+# *load* time, and only binds its Enter-key trigger widget if that config validates.
+# Sourced later (in the shared modular loop) the provider was still unset → defaulted
+# to anthropic → no key → validation failed → the ",," trigger was never wired up.
+# (exports.zsh self-guards, so the loader below re-sourcing it is a harmless no-op.)
+[ -f "$ZDOTDIR/exports.zsh" ] && source "$ZDOTDIR/exports.zsh"
+
 export ZSH="$HOME/.local/share/omz"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
