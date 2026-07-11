@@ -71,15 +71,14 @@ chmod 600 ~/.config/zsh/zsh-ai.local.zsh
 
 For managed hosts, put the key in Ansible inventory so future deployments get
 the file automatically. If you are okay storing this low-value key in your
-private git repo, use a normal plaintext vars file:
+private git repo, put it in the fleet defaults:
 
 ```bash
 cd ansible
-mkdir -p inventory/group_vars/all
-$EDITOR inventory/group_vars/all/zsh-ai.yml
+$EDITOR inventory/group_vars/all.yml
 ```
 
-Put this inside:
+Set this variable:
 
 ```yaml
 zsh_ai_openai_api_key: "paste-your-key-here"
