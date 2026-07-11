@@ -55,6 +55,44 @@ installs chezmoi, copies this tree to the target user's
 `~/.local/share/chezmoi`, runs `chezmoi init` with `DOTFILES_SCOPE={{ scope }}`,
 then `chezmoi apply`, then sets zsh as the login shell.
 
+## zsh-ai API key
+
+`dot_config/zsh/exports.zsh` sets the zsh-ai defaults for Groq's
+OpenAI-compatible endpoint. The API key lives in
+`~/.config/zsh/zsh-ai.local.zsh`, which `exports.zsh` sources if present.
+
+For a one-off local Mac setup, create that file by hand:
+
+```bash
+mkdir -p ~/.config/zsh
+printf 'export ZSH_AI_OPENAI_API_KEY=%q\n' 'paste-your-key-here' > ~/.config/zsh/zsh-ai.local.zsh
+chmod 600 ~/.config/zsh/zsh-ai.local.zsh
+```
+
+For managed hosts, put the key in Ansible inventory so future deployments get
+the file automatically. If you are okay storing this low-value key in your
+private git repo, use a normal plaintext vars file:
+
+```bash
+cd ansible
+mkdir -p inventory/group_vars/all
+$EDITOR inventory/group_vars/all/zsh-ai.yml
+```
+
+Put this inside:
+
+```yaml
+zsh_ai_openai_api_key: "paste-your-key-here"
+```
+
+Then run playbooks normally; no `--ask-vault-pass` is needed. The Debian
+`dotfiles` role and Alpine `alpine_base` role will write
+`~/.config/zsh/zsh-ai.local.zsh` with mode `0600`. Leave the variable undefined
+on hosts that should not receive the key.
+
+If you later decide the key should be protected, move the same variable into an
+Ansible Vault file instead and run playbooks with `--ask-vault-pass`.
+
 ## ★ The load-bearing bit
 
 `dot_config/zsh/dot_zshrc.tmpl` preserves the exact ordering bootstrap.sh fought
