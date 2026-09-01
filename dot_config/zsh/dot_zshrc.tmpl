@@ -10,6 +10,13 @@
       5. zsh-syntax-highlighting sourced DEAD LAST (it only colours widgets
          defined before it)
 
+  cmux relay (2026-09-02): a cmux relay shell starts with ZDOTDIR pointing at the
+  relay directory and CMUX_REAL_ZDOTDIR at the real one, so every file load goes
+  through ZSHCFG (identical to ZDOTDIR in a normal shell), the tmux auto-attach
+  skips relay shells, and the p10k wizard is disabled so an ephemeral shell never
+  runs it. This block was hand-added on general-lxc and phora-lxc first; a converge
+  from a source without it silently reverted it (infra backlog #58).
+
   The {{ if ne .scope "minimal" }} block below replaces bootstrap.sh's two code
   paths (the build_zshrc() minimal/standard split) with one templated file.
   On minimal: no tmux launch, no Oh My Zsh/p10k — just the modular configs,
@@ -22,10 +29,16 @@
   Per fzf-tab's docs the order is load-bearing: compinit, then fzf-tab, then the
   widget-wrapping plugins, with syntax-highlighting DEAD LAST (end of file).
 */ -}}
+# cmux relay shell'inde $ZDOTDIR relay dizinini gösterir; asıl zsh config'i
+# gerçek dizinde durur. Dosya yüklemeleri bunu kullansın (normal shell'de fark yok).
+ZSHCFG="${CMUX_REAL_ZDOTDIR:-$ZDOTDIR}"
 {{ if and (ne .scope "minimal") (ne .scope "lean") -}}
+# Efemer bir shell'de p10k sihirbazı açılıp emeğini çöpe atmasın:
+POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
 # --- Auto-launch tmux on SSH (MUST stay above the p10k instant-prompt block) ---
 # Bypass once with:  ssh -t user@host "SKIP_TMUX=1 zsh -l"
-if [[ -z "$TMUX" ]] && [[ -n "$SSH_CONNECTION" ]] && [[ -t 0 ]] && [[ -z "$SKIP_TMUX" ]]; then
+if [[ -z "$TMUX" ]] && [[ -n "$SSH_CONNECTION" ]] && [[ -t 0 ]] && [[ -z "$SKIP_TMUX" ]] \
+   && [[ "$ZDOTDIR" != */.cmux/relay/* ]] ; then
   if command -v tmux &>/dev/null; then
     exec tmux new-session -A -s main      # detaching (C-b d) closes the SSH session
   else
@@ -44,7 +57,7 @@ fi
 # Sourced later (in the shared modular loop) the provider was still unset → defaulted
 # to anthropic → no key → validation failed → the ",," trigger was never wired up.
 # (exports.zsh self-guards, so the loader below re-sourcing it is a harmless no-op.)
-[ -f "$ZDOTDIR/exports.zsh" ] && source "$ZDOTDIR/exports.zsh"
+[ -f "$ZSHCFG/exports.zsh" ] && source "$ZSHCFG/exports.zsh"
 
 export ZSH="$HOME/.local/share/omz"
 ZSH_THEME="powerlevel10k/powerlevel10k"
@@ -54,7 +67,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(git zsh-autosuggestions you-should-use zsh-interactive-cd zsh-ai)
 
 source "$ZSH/oh-my-zsh.sh"
-[[ ! -f "$ZDOTDIR/.p10k.zsh" ]] || source "$ZDOTDIR/.p10k.zsh"
+[[ ! -f "$ZSHCFG/.p10k.zsh" ]] || source "$ZSHCFG/.p10k.zsh"
 
 {{ end -}}
 {{ if eq .scope "lean" -}}
@@ -83,7 +96,7 @@ fi
 {{ end -}}
 # Load modular configs (exports first so PATH is ready for the rest)
 for f in exports aliases functions fzf; do
-  [ -f "$ZDOTDIR/$f.zsh" ] && source "$ZDOTDIR/$f.zsh"
+  [ -f "$ZSHCFG/$f.zsh" ] && source "$ZSHCFG/$f.zsh"
 done
 
 # zoxide AFTER exports.zsh — that's what puts ~/.local/bin (where zoxide and uv

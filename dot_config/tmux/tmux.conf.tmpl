@@ -56,3 +56,6 @@ set -ag status-right '#{E:@catppuccin_status_session}'
 
 # TPM last — installs/loads tmux-sensible.
 run '~/.config/tmux/plugins/tpm/tpm'
+
+# Sunucuyu cron baslatirsa SHELL=/bin/sh kaliyor; pencereler daima zsh acsin (2026-08-28)
+set -g default-shell {{ lookPath "zsh" }}

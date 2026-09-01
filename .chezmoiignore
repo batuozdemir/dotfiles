@@ -8,3 +8,4 @@
 {{ if or (eq .scope "minimal") (eq .scope "lean") }}
 .config/tmux
 {{ end }}
+README.md
