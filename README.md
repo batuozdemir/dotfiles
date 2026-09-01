@@ -1,9 +1,14 @@
-# dotfiles/ — the chezmoi source tree (Phases 6–7)
+# dotfiles — the chezmoi source tree
 
-This folder is a **chezmoi source tree**: it holds the *source* versions of the
-shell/tmux config that get laid down into a user's home directory. It replaces
-Phases 6–7 of `bootstrap.sh` (the zsh + Oh My Zsh + tmux part). Nothing here is
-security-sensitive.
+This repo is a **chezmoi source tree**: the *source* versions of the shell and tmux
+config that chezmoi lays down into a user's home directory. It is the single source
+for every managed machine (`general-lxc`, `phora-lxc`, and each box the bootstrap
+pipeline builds). Nothing here is security-sensitive; **no secret ever enters this
+repo** (see "zsh-ai API key" below).
+
+History: split out of `script-server-bootstrap/dotfiles/` on 2026-09-02 with its
+commits intact (bootstrap `PLAN.md`, decision 5 and §8.10). The copy left behind in
+that repo is frozen; edit here.
 
 ## chezmoi in one minute
 
@@ -34,35 +39,46 @@ chezmoi maps funny source names to real dotfile paths in `$HOME`:
   `zsh-autosuggestions`, `fzf-tab`, `zsh-interactive-cd`, `zsh-syntax-highlighting`
   (cloned by `run_onchange_after_25-install-lean-plugins.sh.tmpl` into
   `$XDG_DATA_HOME/zsh/plugins`). Still no p10k/tmux. This is the default for the
-  lightweight Alpine LXC path (`create-lxc.sh distro=alpine` → `ansible/alpine.yml`).
-  Skips `uv` (no Python toolchain by default) and reuses a distro-provided `fzf`.
+  lightweight Alpine LXC path. Skips `uv` (no Python toolchain by default) and
+  reuses a distro-provided `fzf`.
 - **standard / full** — adds Oh My Zsh + p10k + plugins + tmux/TPM/catppuccin.
 
-(`full` shell == `standard` shell; the server extras that `--full` adds — Docker,
-Netdata — live in Ansible roles, not in dotfiles.)
+(`full` shell == `standard` shell; the server extras that `full` adds — Docker,
+Netdata — live in Ansible roles, not here.)
 
-## Try it by hand (interactive)
+Oh My Zsh lives at `~/.local/share/omz` (the XDG path) on every machine.
+
+## Rules
+
+- **Managed files are never edited on a host.** Machine-specific lines go in
+  `~/.config/zsh/local.zsh` (not yet sourced — lands with the Mac reconcile) or, for
+  the zsh-ai key, `~/.config/zsh/zsh-ai.local.zsh`. Anything wanted on more than one
+  machine goes into this repo and arrives by `chezmoi update`.
+- **Linux-only lines go behind `{{ if eq .chezmoi.os "linux" }}` or a `command -v`
+  guard.** macOS is not managed yet, but this habit keeps the door open.
+- `chezmoi diff` before `chezmoi apply`, always.
+
+## Apply it
 
 ```bash
-# point chezmoi at THIS folder and apply to your home, prompting for scope:
-chezmoi init --apply --source /path/to/script-server-bootstrap/dotfiles
-chezmoi diff       # preview what would change next time
+# by hand, prompting for scope:
+chezmoi init --apply <git-url>          # or: --source /path/to/this/checkout
+chezmoi diff                            # preview what would change next time
+
+# non-interactively (this is what the Ansible `dotfiles` role does):
+DOTFILES_SCOPE=standard chezmoi init --apply <git-url>
 ```
 
-## How it's applied in the pipeline
-
-The Ansible `dotfiles` role (`ansible/roles/dotfiles/`) does it non-interactively:
-installs chezmoi, copies this tree to the target user's
-`~/.local/share/chezmoi`, runs `chezmoi init` with `DOTFILES_SCOPE={{ scope }}`,
-then `chezmoi apply`, then sets zsh as the login shell.
+`DOTFILES_SCOPE` is checked *first* by `.chezmoi.toml.tmpl`; the interactive prompt
+only appears when it is unset and stdin is a TTY. The git URL is the private remote
+Batu creates; the pipeline's `dotfiles` role passes it as `dotfiles_repo`.
 
 ## zsh-ai API key
 
-`dot_config/zsh/exports.zsh` sets the zsh-ai defaults for Groq's
-OpenAI-compatible endpoint. The API key lives in
-`~/.config/zsh/zsh-ai.local.zsh`, which `exports.zsh` sources if present.
-
-For a one-off local Mac setup, create that file by hand:
+`dot_config/zsh/exports.zsh` sets the zsh-ai defaults for Groq's OpenAI-compatible
+endpoint. The key itself lives in `~/.config/zsh/zsh-ai.local.zsh` (mode `0600`),
+which `exports.zsh` sources if present. That file is written by the Ansible
+`dotfiles` role from an **Ansible Vault** variable, or by hand on an unmanaged box:
 
 ```bash
 mkdir -p ~/.config/zsh
@@ -70,31 +86,11 @@ printf 'export ZSH_AI_OPENAI_API_KEY=%q\n' 'paste-your-key-here' > ~/.config/zsh
 chmod 600 ~/.config/zsh/zsh-ai.local.zsh
 ```
 
-For managed hosts, put the key in Ansible inventory so future deployments get
-the file automatically. If you are okay storing this low-value key in your
-private git repo, put it in the fleet defaults:
-
-```bash
-cd ansible
-$EDITOR inventory/group_vars/all.yml
-```
-
-Set this variable:
-
-```yaml
-zsh_ai_openai_api_key: "paste-your-key-here"
-```
-
-Then run playbooks normally; no `--ask-vault-pass` is needed. The Debian
-`dotfiles` role and Alpine `alpine_base` role will write
-`~/.config/zsh/zsh-ai.local.zsh` with mode `0600`. Leave the variable undefined
-on hosts that should not receive the key.
-
-If you later decide the key should be protected, move the same variable into an
-Ansible Vault file instead and run playbooks with `--ask-vault-pass`.
+Never put the key in this repo, in a plaintext `group_vars` file, or in a transcript.
 
 ## ★ The load-bearing bit
 
-`dot_config/zsh/dot_zshrc.tmpl` preserves the exact ordering bootstrap.sh fought
-for (tmux above p10k instant-prompt; zoxide after exports; syntax-highlighting
-dead last). The comment block at the top of that file explains why — don't reorder.
+`dot_config/zsh/dot_zshrc.tmpl` preserves an exact ordering (tmux above p10k
+instant-prompt; `exports.zsh` before Oh My Zsh loads zsh-ai; zoxide after exports;
+syntax-highlighting dead last). The comment block at the top of that file explains
+why — don't reorder.
