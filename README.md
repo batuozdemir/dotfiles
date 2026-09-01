@@ -14,7 +14,8 @@ chezmoi maps funny source names to real dotfile paths in `$HOME`:
 | `dot_zshenv`                  | `~/.zshenv`                   |
 | `dot_config/zsh/dot_zshrc.tmpl` | `~/.config/zsh/.zshrc` *(templated)* |
 | `dot_config/zsh/aliases.zsh`  | `~/.config/zsh/aliases.zsh`   |
-| `dot_config/tmux/tmux.conf`   | `~/.config/tmux/tmux.conf`    |
+| `dot_config/zsh/dot_p10k.zsh` | `~/.config/zsh/.p10k.zsh` (managed since 2026-09-02) |
+| `dot_config/tmux/tmux.conf.tmpl` | `~/.config/tmux/tmux.conf` *(templated)* |
 
 - `dot_` → a leading `.`  ·  `.tmpl` → the file is a Go template (gets rendered).
 - `run_onchange_*.sh.tmpl` → a script chezmoi runs, but **only when its rendered
