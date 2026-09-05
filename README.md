@@ -73,24 +73,9 @@ DOTFILES_SCOPE=standard chezmoi init --apply <git-url>
 only appears when it is unset and stdin is a TTY. The git URL is the private remote
 Batu creates; the pipeline's `dotfiles` role passes it as `dotfiles_repo`.
 
-## zsh-ai API key
-
-`dot_config/zsh/exports.zsh` sets the zsh-ai defaults for Groq's OpenAI-compatible
-endpoint. The key itself lives in `~/.config/zsh/zsh-ai.local.zsh` (mode `0600`),
-which `exports.zsh` sources if present. That file is written by the Ansible
-`dotfiles` role from an **Ansible Vault** variable, or by hand on an unmanaged box:
-
-```bash
-mkdir -p ~/.config/zsh
-printf 'export ZSH_AI_OPENAI_API_KEY=%q\n' 'paste-your-key-here' > ~/.config/zsh/zsh-ai.local.zsh
-chmod 600 ~/.config/zsh/zsh-ai.local.zsh
-```
-
-Never put the key in this repo, in a plaintext `group_vars` file, or in a transcript.
-
 ## ★ The load-bearing bit
 
 `dot_config/zsh/dot_zshrc.tmpl` preserves an exact ordering (tmux above p10k
-instant-prompt; `exports.zsh` before Oh My Zsh loads zsh-ai; zoxide after exports;
+instant-prompt; `exports.zsh` before Oh My Zsh; zoxide after exports;
 syntax-highlighting dead last). The comment block at the top of that file explains
 why — don't reorder.

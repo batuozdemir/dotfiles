@@ -16,14 +16,6 @@ omz_plugins:
     dest: plugins/you-should-use
   - repo: https://github.com/changyuheng/zsh-interactive-cd
     dest: plugins/zsh-interactive-cd
-  # zsh-ai: type the trigger (",," — see ZSH_AI_TRIGGER in exports.zsh) and it
-  # fills in a command. Needs an API key (see the plugin README) — installed but
-  # inert until configured. Cloned from upstream matheusml/zsh-ai: it carries the
-  # ZSH_AI_TRIGGER + ZSH_AI_OPENAI_REASONING_EFFORT support the old batuozdemir
-  # fork lacked. (Editing this list re-runs the installer, but its `[ -d ] && return`
-  # guard won't re-clone an existing box — remove the plugin dir to force a refresh.)
-  - repo: https://github.com/matheusml/zsh-ai.git
-    dest: plugins/zsh-ai
 
 # The 'lean' scope (lightweight Alpine boxes) does NOT use Oh My Zsh — these few
 # KB-sized plugins are git-cloned into $XDG_DATA_HOME/zsh/plugins/<dest> and
