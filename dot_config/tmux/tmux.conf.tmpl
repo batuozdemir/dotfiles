@@ -59,3 +59,13 @@ run '~/.config/tmux/plugins/tpm/tpm'
 
 # Sunucuyu cron baslatirsa SHELL=/bin/sh kaliyor; pencereler daima zsh acsin (2026-08-28)
 set -g default-shell {{ lookPath "zsh" }}
+
+# cmux ssh (cmux 0.65+): a server started inside a `cmux ssh` pane inherits that pane's
+# CMUX_TUI_* vars, so agents in every later window would report to that one pane forever.
+# Without them cmux's hook helper routes each event to the cmux pane that has the
+# session attached at that moment (measured on scraper 2026-10-09).
+set-environment -gu CMUX_TUI_HOOK
+set-environment -gu CMUX_TUI_SOCKET
+set-environment -gu CMUX_TUI_TERMINAL_ID
+set-environment -gu CMUX_TUI_SESSION_ID
+set-environment -gu CMUX_MUX_SOCKET
