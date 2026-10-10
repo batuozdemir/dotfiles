@@ -6,7 +6,7 @@ its own git repo (remote: a private GitHub repo named dotfiles) and the single s
 for those files. Split out of `script-server-bootstrap` on 2026-09-02; the copy left there
 is frozen.
 
-status: stable and clean on `main` at 6a1b715 (tmux global env drops cmux's `CMUX_TUI_*` vars, applied to the fleet 2026-10-09); only open item is Batu's own Groq key rotation, which the assistant never chases; see README "Open work"
+status: stable; last fleet change 6a1b715 (tmux global env drops cmux's `CMUX_TUI_*` vars, applied to the fleet 2026-10-09); only open item is Batu's own Groq key rotation, which the assistant never chases; see README "Open work"
 
 ## Rules that cause harm if unknown
 

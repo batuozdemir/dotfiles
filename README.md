@@ -103,7 +103,7 @@ why — don't reorder.
 
 ## Next session starts here
 
-Written 2026-10-10. Nothing in progress; the repo is clean on `main` at `6a1b715`. The
+Written 2026-10-10. Nothing in progress; the last fleet change is `6a1b715`. The
 only pending item is Batu's own key rotation (see "Open work"), which the assistant does
 not chase. Before applying anything to a host, run `chezmoi diff`. Never read the
 Mac's `~/.config/zsh/exports.zsh` (it holds keys).
