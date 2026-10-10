@@ -22,8 +22,9 @@ status: stable and clean on `main` at 6a1b715 (tmux global env drops cmux's `CMU
 - `dot_config/zsh/dot_zshrc.tmpl` has a load-bearing order (tmux above the p10k instant
   prompt, `exports.zsh` before Oh My Zsh, zoxide after exports, syntax-highlighting last).
   Do not reorder; the comment block at the top of that file says why.
-- Never open, print or grep the values of any key file, and never read the Mac's
-  `~/.config/zsh/exports.zsh`. The Groq key rotation is Batu's to time: the standing
+- Test key files for presence, never print values (bootstrap PLAN.md §4: the rail holds
+  only if the assistant tests for presence instead of printing; the Mac's
+  `~/.config/zsh/exports.zsh` is the last place with inline keys). The Groq key rotation is Batu's to time: the standing
   directive (2026-09-02) is that the assistant does not remind him again, so it never
   becomes a reminder or an agenda item.
 - Traps (2026-10-09, cmux 0.65 switch): the scraper and flicker hosts carry a copied
