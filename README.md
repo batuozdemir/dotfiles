@@ -79,3 +79,31 @@ Batu creates; the pipeline's `dotfiles` role passes it as `dotfiles_repo`.
 instant-prompt; `exports.zsh` before Oh My Zsh; zoxide after exports;
 syntax-highlighting dead last). The comment block at the top of that file explains
 why — don't reorder.
+
+## Open work
+
+- **Groq API key rotation (Batu's timing).** Three Groq keys are due for rotation. Batu's
+  directive of 2026-09-02, kept verbatim: "Batu'nun zamanlaması; asistan bir daha
+  hatırlatmayacak (2026-09-02 direktifi)". So never remind him and never turn it into a
+  reminder or an agenda item. Where the keys live, by name only: `GROQ_API_KEY` and
+  `ZSH_AI_OPENAI_API_KEY` in `~/.config/zsh/exports.zsh` on the Mac (hand-maintained there;
+  chezmoi is not installed on the Mac, see `tools/mac/README.md`), and `zsh_ai_openai_api_key`, in plaintext, in
+  `archive/script-server-bootstrap-2026-09-03/ansible/inventory/group_vars/all.yml`. All
+  three landed in a transcript on 2026-09-02. After the rotation: on the Mac, move the
+  new key to `zsh-ai.local.zsh` (mode 0600) and remove it from `exports.zsh`; on the
+  fleet, move it into Ansible Vault following the `VAULT.md` recipe and delete it from
+  `all.yml`. Measured 2026-10-10: this repo's `dot_config/zsh/exports.zsh` contains none
+  of these variable names (`grep -c` = 0), so nothing here needs a change. Never open,
+  print or grep the values of any key file.
+- **Someday:** decide whether `tools/` gets a dotfiles manager (chezmoi or stow) of its
+  own, once the manual deploy-script juggling starts to hurt.
+- **Stale text:** the intro points to a "zsh-ai API key" section that no longer exists
+  (zsh-ai was removed from the fleet in commit `00afdc0`). Left as is; fix when the
+  README is next edited for another reason.
+
+## Next session starts here
+
+Written 2026-10-10. Nothing in progress; the repo is clean on `main` at `6a1b715`. The
+only pending item is Batu's own key rotation (see "Open work"), which the assistant does
+not chase. Before applying anything to a host, run `chezmoi diff`. Never read the
+Mac's `~/.config/zsh/exports.zsh` (it holds keys).
