@@ -1,0 +1,64 @@
+**/.claude/settings.local.json
+
+**/.claude/.cc-writes/
+
+# Isletim sistemi
+.DS_Store
+._*
+Thumbs.db
+desktop.ini
+
+# Office ve editor kilit/gecici dosyalari
+~$*
+~WRL*.tmp
+.~lock.*#
+*.swp
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.uv-cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.nox/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+*.egg-info/
+
+# Node ve web
+node_modules/
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+*.tsbuildinfo
+.astro/
+.next/
+.nuxt/
+.svelte-kit/
+.parcel-cache/
+.turbo/
+
+# Swift ve Xcode
+.build/
+.swiftpm/
+xcuserdata/
+DerivedData/
+
+# Java
+*.class
+.gradle/
+
+# Ruby
+.bundle/
+
+# Syncthing
+.stversions/
+~syncthing~*.tmp
+.syncthing.*.tmp
