@@ -9,3 +9,6 @@
 .config/tmux
 {{ end }}
 README.md
+# The repo's own card: deployed it would become ~/CLAUDE.md and load into every
+# Claude session on the host.
+CLAUDE.md

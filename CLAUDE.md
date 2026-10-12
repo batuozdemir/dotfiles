@@ -6,7 +6,7 @@ its own git repo (remote: a private GitHub repo named dotfiles) and the single s
 for those files. Split out of `script-server-bootstrap` on 2026-09-02; the copy left there
 is frozen.
 
-status: stable; last fleet change 6a1b715 (tmux global env drops cmux's `CMUX_TUI_*` vars, applied to the fleet 2026-10-09); only open item is Batu's own Groq key rotation, which the assistant never chases; see README "Open work"
+status: stable; last fleet change 4aa7f74 (global git ignore `~/.config/git/ignore`, applied to phora-lxc only on 2026-10-12; other hosts get it with their next apply), before it 6a1b715 (tmux global env drops cmux's `CMUX_TUI_*` vars, applied to the fleet 2026-10-09); cleanup of host drift is infra backlog #120; only open item is Batu's own Groq key rotation, which the assistant never chases; see README "Open work"
 
 ## Rules that cause harm if unknown
 
@@ -31,6 +31,12 @@ status: stable; last fleet change 6a1b715 (tmux global env drops cmux's `CMUX_TU
   chezmoi source with an empty `.git` and no remote, so `chezmoi git pull` fails there and
   an apply would revert hand-added lines. Do not apply to them until their sources are
   adopted as real clones. pve is not chezmoi-managed.
+- Traps (2026-10-12, global git ignore): edit and push from this Mac clone only; the hosts'
+  sources are pull-only (no GitHub write credentials there: `Permission denied (publickey)`),
+  and a commit made on a host forks this clone from GitHub. `chezmoi apply <file>` fails with
+  `stat ...: no such file or directory` when the parent directory is missing on the host:
+  apply the parent (`chezmoi apply ~/.config/git`). The sandbox denies writes under this
+  repo's `.git`, so fetch, commit and push need a one-off sandbox escape.
 - Scope (`minimal | lean | standard | full`) is chosen at `chezmoi init` and gates Oh My
   Zsh, p10k and tmux. Do not assume tmux exists on a `minimal` or `lean` box.
 
