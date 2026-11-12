@@ -42,8 +42,9 @@ status: the new Mac joined the source 2026-11-12 (Mac-only `mac.zsh`, `.zprofile
   sources are pull-only (no GitHub write credentials there: `Permission denied (publickey)`),
   and a commit made on a host forks this clone from GitHub. `chezmoi apply <file>` fails with
   `stat ...: no such file or directory` when the parent directory is missing on the host:
-  apply the parent (`chezmoi apply ~/.config/git`). The sandbox denies writes under this
-  repo's `.git`, so fetch, commit and push need a one-off sandbox escape.
+  apply the parent (`chezmoi apply ~/.config/git`). On 2026-10-12 the sandbox denied writes
+  under this repo's `.git`; on 2026-11-12 `git add` and `git commit` ran sandboxed. Try
+  sandboxed first; fetch and push are not re-measured.
 - Scope (`minimal | lean | standard | full`) is chosen at `chezmoi init` and gates Oh My
   Zsh, p10k and tmux. Do not assume tmux exists on a `minimal` or `lean` box.
 
