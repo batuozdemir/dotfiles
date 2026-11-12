@@ -6,7 +6,7 @@ its own git repo (remote: a private GitHub repo named dotfiles) and the single s
 for those files. Split out of `script-server-bootstrap` on 2026-09-02; the copy left there
 is frozen.
 
-status: the new Mac joined the source 2026-11-12 (Mac-only `mac.zsh`, `.zprofile`, darwin blocks; Linux renders unchanged except the shared Claude Code aliases), committed, not pushed (Batu's yes; the new Mac clones from GitHub); never applied to the old Mac; fleet hosts get the aliases at their next apply; before that, last fleet change 4aa7f74 (global git ignore `~/.config/git/ignore`, applied to phora-lxc only on 2026-10-12; other hosts get it with their next apply), before it 6a1b715 (tmux global env drops cmux's `CMUX_TUI_*` vars, applied to the fleet 2026-10-09); cleanup of host drift is infra backlog #120; only open item is Batu's own Groq key rotation, which the assistant never chases; see README "Open work"
+status: the new Mac joined the source 2026-11-12 (Mac-only `mac.zsh`, `.zprofile`, darwin blocks; Linux renders unchanged except the shared Claude Code aliases), pushed to GitHub 2026-11-12 (d0c65e5; the new Mac clones from there); never applied to the old Mac; fleet hosts get the aliases at their next apply; before that, last fleet change 4aa7f74 (global git ignore `~/.config/git/ignore`, applied to phora-lxc only on 2026-10-12; other hosts get it with their next apply), before it 6a1b715 (tmux global env drops cmux's `CMUX_TUI_*` vars, applied to the fleet 2026-10-09); cleanup of host drift is infra backlog #120; only open item is Batu's own Groq key rotation, which the assistant never chases; see README "Open work"
 
 ## Rules that cause harm if unknown
 
@@ -44,7 +44,7 @@ status: the new Mac joined the source 2026-11-12 (Mac-only `mac.zsh`, `.zprofile
   `stat ...: no such file or directory` when the parent directory is missing on the host:
   apply the parent (`chezmoi apply ~/.config/git`). On 2026-10-12 the sandbox denied writes
   under this repo's `.git`; on 2026-11-12 `git add` and `git commit` ran sandboxed. Try
-  sandboxed first; fetch and push are not re-measured.
+  sandboxed first; fetch and push ran sandboxed on 2026-11-12.
 - Scope (`minimal | lean | standard | full`) is chosen at `chezmoi init` and gates Oh My
   Zsh, p10k and tmux. Do not assume tmux exists on a `minimal` or `lean` box.
 
