@@ -7,7 +7,7 @@ pipeline builds). Nothing here is security-sensitive; **no secret ever enters th
 repo** (see "zsh-ai API key" below).
 
 History: split out of `script-server-bootstrap/dotfiles/` on 2026-09-02 with its
-commits intact (bootstrap `PLAN.md`, decision 5 and §8.10). The copy left behind in
+commits intact (`projects/bootstrap/PLAN.md`, decision 5 and §8.10). The copy left behind in
 that repo is frozen; edit here.
 
 ## chezmoi in one minute
@@ -21,6 +21,8 @@ chezmoi maps funny source names to real dotfile paths in `$HOME`:
 | `dot_config/zsh/aliases.zsh`  | `~/.config/zsh/aliases.zsh`   |
 | `dot_config/zsh/dot_p10k.zsh` | `~/.config/zsh/.p10k.zsh` (managed since 2026-09-02) |
 | `dot_config/tmux/tmux.conf.tmpl` | `~/.config/tmux/tmux.conf` *(templated)* |
+| `dot_config/zsh/mac.zsh`      | `~/.config/zsh/mac.zsh` (macOS only, loaded last) |
+| `dot_config/zsh/dot_zprofile` | `~/.config/zsh/.zprofile` (macOS only: Homebrew's PATH) |
 
 - `dot_` → a leading `.`  ·  `.tmpl` → the file is a Go template (gets rendered).
 - `run_onchange_*.sh.tmpl` → a script chezmoi runs, but **only when its rendered
@@ -51,12 +53,33 @@ Oh My Zsh lives at `~/.local/share/omz` (the XDG path) on every machine.
 ## Rules
 
 - **Managed files are never edited on a host.** Machine-specific lines go in
-  `~/.config/zsh/local.zsh` (not yet sourced — lands with the Mac reconcile) or, for
+  `~/.config/zsh/local.zsh` (not yet sourced; sourcing it fleet-wide waits until after
+  the Mac move, first checking whether any host already has one) or, for
   the zsh-ai key, `~/.config/zsh/zsh-ai.local.zsh`. Anything wanted on more than one
   machine goes into this repo and arrives by `chezmoi update`.
 - **Linux-only lines go behind `{{ if eq .chezmoi.os "linux" }}` or a `command -v`
-  guard.** macOS is not managed yet, but this habit keeps the door open.
+  guard.** Mac-only lines go in `mac.zsh`, or a darwin block where they must load early.
+  The new Mac (from 2026-11-12) uses the servers' XDG layout; the old Mac is never applied
+  to (its data and caches live under `~/.config`).
 - `chezmoi diff` before `chezmoi apply`, always.
+
+## Proving the fleet is unchanged
+
+Render the source before and after a change as Linux, for every scope, and compare.
+Copy both trees, replace `.chezmoi.os` with `"linux"` and `lookPath "zsh"` with a fixed
+path (it would resolve to the Mac's zsh), then per scope:
+
+```bash
+printf '[data]\n    scope = "standard"\n' > "$TMPDIR/c.toml"
+chezmoi archive --source <copy> --config "$TMPDIR/c.toml" --persistent-state "$TMPDIR/st" \
+  --format tar --destination /home/u > out.tar     # includes the run_onchange scripts
+tar -tvf out.tar   # names and modes; extract both and `diff -r` the contents
+```
+
+Any changed byte in a rendered `run_onchange_` script re-runs it on every host at the next
+apply. The Mac side is tested by `chezmoi apply --destination <empty dir> --exclude=scripts`
+and `env -i HOME=<dir> zsh -lic ...` (without `env -i` the session's `ZDOTDIR` loads the
+real config instead).
 
 ## Apply it
 
@@ -85,14 +108,16 @@ why — don't reorder.
 - **Groq API key rotation (Batu's timing).** Three Groq keys are due for rotation. Batu's
   directive of 2026-09-02, kept verbatim: "Batu'nun zamanlaması; asistan bir daha
   hatırlatmayacak (2026-09-02 direktifi)". So never remind him and never turn it into a
-  reminder or an agenda item. Where the keys live, by name only: `GROQ_API_KEY` and
-  `ZSH_AI_OPENAI_API_KEY` in `~/.config/zsh/exports.zsh` on the Mac (hand-maintained there;
-  chezmoi is not installed on the Mac, see `tools/mac/README.md`), and `zsh_ai_openai_api_key`, in plaintext, in
-  `archive/script-server-bootstrap-2026-09-03/ansible/inventory/group_vars/all.yml`. All
-  three landed in a transcript on 2026-09-02. After the rotation: on the Mac, move the
-  new key to `zsh-ai.local.zsh` (mode 0600) and remove it from `exports.zsh`; on the
-  fleet, move it into Ansible Vault following the `VAULT.md` recipe and delete it from
-  `all.yml`. Measured 2026-10-10: this repo's `dot_config/zsh/exports.zsh` contains none
+  reminder or an agenda item. Where the keys live, by name only: `zsh_ai_openai_api_key`,
+  in plaintext, in
+  `archive/script-server-bootstrap-2026-09-03/ansible/inventory/group_vars/all.yml`; on the
+  Mac, `GROQ_API_KEY` and `ZSH_AI_OPENAI_API_KEY` were in `~/.config/zsh/exports.zsh` on
+  2026-09-02, but measured 2026-11-12 (variable names only) that file holds neither and
+  `local.zsh` / `zsh-ai.local.zsh` do not exist; where the Mac's keys live now is not
+  measured. All three landed in a transcript on 2026-09-02. After the rotation: on the
+  Mac, the new key goes to `zsh-ai.local.zsh` (mode 0600); on the
+  fleet, move it into Ansible Vault following the `projects/bootstrap/ansible/VAULT.md`
+  recipe and delete it from the archived group vars file named above. Measured 2026-10-10: this repo's `dot_config/zsh/exports.zsh` contains none
   of these variable names (`grep -c` = 0), so nothing here needs a change. Never open,
   print or grep the values of any key file.
 - **Someday:** decide whether `tools/` gets a dotfiles manager (chezmoi or stow) of its
@@ -101,9 +126,6 @@ why — don't reorder.
   (zsh-ai was removed from the fleet in commit `00afdc0`). Left as is; fix when the
   README is next edited for another reason.
 
-## Next session starts here
 
-Written 2026-10-10. Nothing in progress; the last fleet change is `6a1b715`. The
-only pending item is Batu's own key rotation (see "Open work"), which the assistant does
-not chase. Before applying anything to a host, run `chezmoi diff`. Never read the
-Mac's `~/.config/zsh/exports.zsh` (it holds keys).
+<!-- path-lint-exempt: script-server-bootstrap/dotfiles/ ~/.config/zsh/mac.zsh ~/.local/share/omz ~/.config/zsh/local.zsh ~/.config/zsh/zsh-ai.local.zsh -->
+<!-- Exempt: the retired repo's old folder (history); paths on the new Mac or the fleet hosts, absent on this Mac by design. -->

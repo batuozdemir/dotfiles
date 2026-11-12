@@ -1,0 +1,3 @@
+# Mac-only (see .chezmoiignore): Homebrew's PATH for login shells, before .zshrc runs,
+# so everything .zshrc loads can find the Homebrew tools.
+eval "$(/opt/homebrew/bin/brew shellenv)"

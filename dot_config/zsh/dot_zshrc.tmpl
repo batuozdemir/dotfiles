@@ -64,6 +64,13 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # sourced LAST (see end of file), after every other widget is defined.
 plugins=(git zsh-autosuggestions you-should-use zsh-interactive-cd)
 
+{{ if eq .chezmoi.os "darwin" -}}
+# Mac only: fzf-tab completion (it must load before zsh-autosuggestions, which wraps
+# widgets), and no paste slowdown from url-quote-magic.
+plugins=(git fzf-tab zsh-autosuggestions you-should-use zsh-interactive-cd)
+DISABLE_MAGIC_FUNCTIONS=true
+
+{{ end -}}
 source "$ZSH/oh-my-zsh.sh"
 [[ ! -f "$ZSHCFG/.p10k.zsh" ]] || source "$ZSHCFG/.p10k.zsh"
 
@@ -93,7 +100,7 @@ fi
 
 {{ end -}}
 # Load modular configs (exports first so PATH is ready for the rest)
-for f in exports aliases functions fzf; do
+for f in exports aliases functions fzf{{ if eq .chezmoi.os "darwin" }} mac{{ end }}; do
   [ -f "$ZSHCFG/$f.zsh" ] && source "$ZSHCFG/$f.zsh"
 done
 

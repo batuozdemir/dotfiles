@@ -6,7 +6,7 @@ its own git repo (remote: a private GitHub repo named dotfiles) and the single s
 for those files. Split out of `script-server-bootstrap` on 2026-09-02; the copy left there
 is frozen.
 
-status: stable; last fleet change 4aa7f74 (global git ignore `~/.config/git/ignore`, applied to phora-lxc only on 2026-10-12; other hosts get it with their next apply), before it 6a1b715 (tmux global env drops cmux's `CMUX_TUI_*` vars, applied to the fleet 2026-10-09); cleanup of host drift is infra backlog #120; only open item is Batu's own Groq key rotation, which the assistant never chases; see README "Open work"
+status: the new Mac joined the source 2026-11-12 (Mac-only `mac.zsh`, `.zprofile`, darwin blocks; Linux renders unchanged except the shared Claude Code aliases), committed, not pushed (Batu's yes; the new Mac clones from GitHub); never applied to the old Mac; fleet hosts get the aliases at their next apply; before that, last fleet change 4aa7f74 (global git ignore `~/.config/git/ignore`, applied to phora-lxc only on 2026-10-12; other hosts get it with their next apply), before it 6a1b715 (tmux global env drops cmux's `CMUX_TUI_*` vars, applied to the fleet 2026-10-09); cleanup of host drift is infra backlog #120; only open item is Batu's own Groq key rotation, which the assistant never chases; see README "Open work"
 
 ## Rules that cause harm if unknown
 
@@ -19,12 +19,19 @@ status: stable; last fleet change 4aa7f74 (global git ignore `~/.config/git/igno
   drift is pending: the 2026-10-09 tmux change was applied only to the tmux config file
   for that reason.
 - Linux-only lines go behind `{{ if eq .chezmoi.os "linux" }}` or a `command -v` guard.
+  Mac-only lines go in `dot_config/zsh/mac.zsh` (or a darwin block where load order
+  needs it). A change to a shared file is proven against the fleet by rendering Linux
+  before and after for all four scopes (`README.md` "Proving the fleet is unchanged").
+- Traps (2026-11-12, Mac reconcile): a `{{ if }}...{{ end -}}` block placed before a blank
+  line swallows that blank line on the OS where the block is false; keep the blank line
+  inside the block. The render comparison caught it twice.
 - `dot_config/zsh/dot_zshrc.tmpl` has a load-bearing order (tmux above the p10k instant
   prompt, `exports.zsh` before Oh My Zsh, zoxide after exports, syntax-highlighting last).
   Do not reorder; the comment block at the top of that file says why.
 - Test key files for presence, never print values (bootstrap PLAN.md §4: the rail holds
   only if the assistant tests for presence instead of printing; the Mac's
-  `~/.config/zsh/exports.zsh` is the last place with inline keys). The Groq key rotation is Batu's to time: the standing
+  `~/.config/zsh/exports.zsh` once held inline keys, none there on 2026-11-12 by a
+  names-only check). The Groq key rotation is Batu's to time: the standing
   directive (2026-09-02) is that the assistant does not remind him again, so it never
   becomes a reminder or an agenda item.
 - Traps (2026-10-09, cmux 0.65 switch): the scraper and flicker hosts carry a copied

@@ -52,3 +52,12 @@ alias update='sudo apt update && sudo apt upgrade -y'
 alias please='sudo $(fc -ln -1)'
 # attach-or-create the 'main' session (matches the SSH auto-launch name)
 alias tm='tmux new-session -A -s main'
+
+# Claude Code, one model per alias (only where it is installed)
+if command -v claude &>/dev/null; then
+  alias cc='claude --model opus'
+  alias ccf='claude --model fable'
+  alias ccs='claude --model sonnet'
+  alias cch='claude --model haiku'
+  alias ccl='claude --model fable --effort low'
+fi

@@ -22,6 +22,10 @@ clone_plugin() {  # $1=repo  $2=dest
 {{ range .omz_plugins -}}
 clone_plugin {{ .repo | quote }} "$ZSH_CUSTOM_DIR/{{ .dest }}"
 {{ end -}}
+{{ if eq .chezmoi.os "darwin" -}}
+# Mac only: fzf-tab, enabled by the darwin block in .zshrc.
+clone_plugin "https://github.com/Aloxaf/fzf-tab" "$ZSH_CUSTOM_DIR/plugins/fzf-tab"
+{{ end -}}
 {{ else -}}
 # scope=minimal/lean: Oh My Zsh and plugins are intentionally not installed
 # (lean sources its few plugins directly — see run_onchange_after_25-...).

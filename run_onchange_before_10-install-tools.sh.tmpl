@@ -11,10 +11,12 @@ set -eu
 
 mkdir -p "$HOME/.local/bin" "$HOME/.cache/zsh"
 
+{{ if eq .chezmoi.os "linux" -}}
 # bat / fd are named batcat / fdfind on Debian — symlink to the expected names.
 ln -sf /usr/bin/batcat "$HOME/.local/bin/bat" 2>/dev/null || true
 ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"  2>/dev/null || true
 
+{{ end -}}
 # zoxide (smarter cd)
 if ! command -v zoxide >/dev/null && [ ! -x "$HOME/.local/bin/zoxide" ]; then
   curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
