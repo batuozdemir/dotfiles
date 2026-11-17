@@ -193,3 +193,6 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND="fd --type=d --hidden --no-ignore-vcs --strip-cwd-prefix"
 # zoxide's `zi` uses the same eza preview ({2..}: zoxide passes "score path").
 export _ZO_FZF_OPTS="--height 40% --layout=reverse --border --preview 'eza --tree --color=always {2..} | head -200'"
+
+# --- Pi coding agent, always inside its srt sandbox (setup: workbench/local-ai/pi/) ---
+alias pis="$HOME/Workspace/workbench/local-ai/pi/pi-sandboxed"
